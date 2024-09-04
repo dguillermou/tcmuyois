@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulaire de calcul de tarif de licence sportive</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+            background-image: url('https://www.example.com/tennis-background.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            font-family: 'Georgia', serif;
+            text-shadow: 1px 1px 2px #bdc3c7;
+        }
+
+        .member {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #27ae60;
+            border-radius: 10px;
+            background-color: #ecf0f1;
+            position: relative;
+        }
+
+        .member h3 {
+            margin: 0;
+            margin-bottom: 10px;
+            color: #27ae60;
+        }
+
+        .remove-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+
+        .remove-button:hover {
+            background-color: #c0392b;
+        }
+
+        button {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #2ecc71;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #34495e;
+        }
+
+        select,
+        input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        .total {
+            font-weight: bold;
+            font-size: 1.5em;
+            color: #27ae60;
+            text-align: right;
+        }
+
+        .total span {
+            font-size: 1.8em;
+        }
+
+        #discountMessage {
+            color: #e67e22;
+            font-size: 1em;
+            text-align: right;
+            margin-top: -10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Calcul de Tarif de Licence Sportive</h1>
+        <form id="licenseForm">
+            <div id="members"></div>
+            <button type="button" onclick="addMember()">Ajouter un membre</button>
+            <hr>
+            <p class="total">Total : <span id="totalPrice">0</span>€</p>
+            <p class="total" id="discountMessage" style="display:none;">Une réduction de 10% a été appliquée!</p>
+        </form>
+    </div>
+
+    <script>
+        const membersContainer = document.getElementById('members');
+        const discountMessage = document.getElementById('discountMessage');
+        let memberCount = 0;
+
+        function addMember() {
+            memberCount++;
+            const memberDiv = document.createElement('div');
+            memberDiv.classList.add('member');
+            memberDiv.setAttribute('id', `member${memberCount}`);
+            memberDiv.innerHTML = `
+                <h3>Membre ${memberCount}</h3>
+                <label>Catégorie d'adhérent :
+                    <select onchange="updateOptions(this, ${memberCount})">
+                        <option value="">Sélectionnez</option>
+                        <option value="adulte">Adulte</option>
+                        <option value="etudiant">Étudiant</option>
+                        <option value="enfant">Enfant (2007-2018)</option>
+                        <option value="mini-tennis">Mini-tennis (après 2019)</option>
+                    </select>
+                </label>
+                <div id="options${memberCount}"></div>
+                <label><input type="checkbox" class="cautionKey" onchange="calculateTotal()" data-member-id="${memberCount}"> Caution Clés (20€)</label>
+                <button type="button" class="remove-button" onclick="removeMember(${memberCount})">Supprimer</button>
+            `;
+            membersContainer.appendChild(memberDiv);
+        }
+
+        function updateOptions(select, memberId) {
+            const optionsDiv = document.getElementById(`options${memberId}`);
+            optionsDiv.innerHTML = '';
+
+            const category = select.value;
+            let optionsHTML = '';
+
+            switch (category) {
+                case 'adulte':
+                    optionsHTML = `
+                        <label><input type="radio" name="member${memberId}" value="50" onchange="calculateTotal()"> Adhérent + Licence FFT sans accès aux terrains (50€)</label><br>
+                        <label><input type="radio" name="member${memberId}" value="150" onchange="calculateTotal()"> Adhérent + Licence TENNIS avec accès aux terrains par TenUp (150€)</label><br>
+                        <label><input type="radio" name="member${memberId}" value="250" onchange="calculateTotal()"> Adhérent + Licence PADEL avec accès aux pistes de Padel (250€)</label><br>
+                        <label><input type="radio" name="member${memberId}" value="300" onchange="calculateTotal()"> Adhérent TENNIS+PADEL avec accès aux terrains de tennis et pistes de Padel (300€)</label><br>
+                    `;
+                    break;
+                case 'etudiant':
+                    optionsHTML = `
+                        <label><input type="radio" name="member${memberId}" value="50" onchange="calculateTotal()"> Adhérent + Licence FFT sans accès aux terrains (50€)</label><br>
+                        <label><input type="radio" name="member${memberId}" value="100" onchange="calculateTotal()"> Adhérent + Licence TENNIS avec accès aux terrains par TenUp (100€)</label><br>
+                        <label><input type="radio" name="member${memberId}" value="200" onchange="calculateTotal()"> Adhérent + Licence PADEL avec accès aux pistes de Padel (200€)</label><br>
+                        <label><input type="radio" name="member${memberId}" value="250" onchange="calculateTotal()"> Adhérent TENNIS+PADEL avec accès aux terrains de tennis et pistes de Padel (250€)</label><br>
+                    `;
+                    break;
+                case 'enfant':
+                    optionsHTML = `
+                        <label><input type="radio" name="member${memberId}" value="50" onchange="calculateTotal()"> Adhérent + Licence FFT sans accès aux terrains (50€)</label><br>
+                        <label><input type="radio" name="member${memberId}" value="100" onchange="calculateTotal()"> Adhérent + Licence TENNIS avec accès aux terrains par TenUp SANS école de tennis (100€)</label><br>
+                        <label><input type="radio" name="member${memberId}" value="50" onchange="calculateTotal()"> Adhérent + Licence TENNIS avec accès aux terrains par TenUp AVEC école de tennis (50€)</label><br>
+                        <label><input type="radio" name="member${memberId}" value="150" onchange="calculateTotal()"> Adhérent + Licence PADEL avec accès aux pistes de Padel SANS école de Padel (150€)</label><br>
+                        <label><input type="radio" name="member${memberId}" value="100" onchange="calculateTotal()"> Adhérent + Licence PADEL avec accès aux pistes de Padel AVEC école de Padel (100€)</label><br>
+                        <label><input type="radio" name="member${memberId}" value="200" onchange="calculateTotal()"> Adhérent TENNIS+PADEL avec accès aux terrains SANS école de Tennis/Padel (200€)</label><br>
+                        <label><input type="radio" name="member${memberId}" value="150" onchange="calculateTotal()"> Adhérent TENNIS+PADEL avec accès aux terrains AVEC école de Tennis/Padel (150€)</label><br>
+                    `;
+                    break;
+                case 'mini-tennis':
+                    optionsHTML = `
+                        <label><input type="radio" name="member${memberId}" value="20" onchange="calculateTotal()"> Adhérent Mini-tennis avec Licence (20€)</label><br>
+                    `;
+                    break;
+            }
+
+            optionsDiv.innerHTML = optionsHTML;
+            calculateTotal();
+        }
+
+        function removeMember(memberId) {
+            const memberDiv = document.getElementById(`member${memberId}`);
+            membersContainer.removeChild(memberDiv);
+            calculateTotal();
+        }
+
+        function calculateTotal() {
+            let total = 0;
+            let totalForDiscount = 0;
+
+            const members = document.querySelectorAll('.member');
+            members.forEach(member => {
+                const radios = member.querySelectorAll('input[type="radio"]:checked');
+                radios.forEach(radio => {
+                    totalForDiscount += parseFloat(radio.value);
+                });
+
+                const cautionCheckbox = member.querySelector('.cautionKey');
+                if (cautionCheckbox.checked) {
+                    total += 20;
+                }
+            });
+
+            // Appliquer une réduction de 10% si au moins 2 membres
+            if (members.length >= 2) {
+                totalForDiscount *= 0.9;
+                discountMessage.style.display = 'block';
+            } else {
+                discountMessage.style.display = 'none';
+            }
+
+            total += totalForDiscount;
+            document.getElementById('totalPrice').textContent = total.toFixed(2);
+        }
+    </script>
+</body>
+
+</html>
